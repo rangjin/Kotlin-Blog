@@ -5,6 +5,7 @@ import com.rangjin.kotlinblog.domain.user.dto.request.UserCreateRequestDto
 import com.rangjin.kotlinblog.domain.user.dto.request.UserDeleteRequestDto
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import javax.validation.Valid
 
 @RestController
 @RequestMapping("/api/v1/user")
@@ -13,12 +14,16 @@ class UserApiController (
 ) {
 
     @PostMapping("/signup")
-    fun signup(@RequestBody request: UserCreateRequestDto): ResponseEntity<Any> {
+    fun signup(
+        @RequestBody @Valid request: UserCreateRequestDto,
+    ): ResponseEntity<Any> {
         return ResponseEntity.ok().body(userService.create(request))
     }
 
     @DeleteMapping("/delete")
-    fun delete(@RequestBody request: UserDeleteRequestDto): ResponseEntity<Any> {
+    fun delete(
+        @RequestBody @Valid request: UserDeleteRequestDto,
+    ): ResponseEntity<Any> {
         userService.delete(request)
         return ResponseEntity.ok().build()
     }

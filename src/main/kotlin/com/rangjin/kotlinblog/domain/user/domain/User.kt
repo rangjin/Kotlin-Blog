@@ -3,7 +3,7 @@ package com.rangjin.kotlinblog.domain.user.domain
 import com.rangjin.kotlinblog.domain.article.domain.Article
 import com.rangjin.kotlinblog.domain.comment.domain.Comment
 import com.rangjin.kotlinblog.domain.user.dto.request.UserCreateRequestDto
-import com.rangjin.ursuuassignment.global.common.BaseTimeEntity
+import com.rangjin.kotlinblog.global.common.BaseTimeEntity
 import javax.persistence.CascadeType
 import javax.persistence.Entity
 import javax.persistence.GeneratedValue
@@ -32,8 +32,8 @@ class User (
 
     ): BaseTimeEntity() {
 
-    constructor(requestDto: UserCreateRequestDto): this(
-        null, requestDto.email, requestDto.password, requestDto.username, emptyList(), emptyList(),
+    constructor(requestDto: UserCreateRequestDto, password: String): this(
+        null, requestDto.email!!, password, requestDto.username!!, emptyList(), emptyList(),
     )
 
 }

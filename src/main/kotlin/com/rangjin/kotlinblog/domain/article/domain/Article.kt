@@ -2,7 +2,7 @@ package com.rangjin.kotlinblog.domain.article.domain
 
 import com.rangjin.kotlinblog.domain.comment.domain.Comment
 import com.rangjin.kotlinblog.domain.user.domain.User
-import com.rangjin.ursuuassignment.global.common.BaseTimeEntity
+import com.rangjin.kotlinblog.global.common.BaseTimeEntity
 import javax.persistence.*
 
 @Entity

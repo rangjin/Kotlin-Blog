@@ -1,4 +1,4 @@
-package com.rangjin.ursuuassignment.global.common
+package com.rangjin.kotlinblog.global.common
 
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedDate

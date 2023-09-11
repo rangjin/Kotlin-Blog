@@ -5,6 +5,7 @@ import com.rangjin.kotlinblog.domain.article.dto.request.ArticleCreateOrUpdateRe
 import com.rangjin.kotlinblog.domain.article.dto.request.ArticleDeleteRequestDto
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import javax.validation.Valid
 
 @RestController
 @RequestMapping("/api/v1/article")
@@ -13,17 +14,25 @@ class ArticleApiController (
 ) {
 
     @PostMapping("/create")
-    fun create(@RequestBody request: ArticleCreateOrUpdateRequestDto): ResponseEntity<Any> {
+    fun create(
+        @RequestBody @Valid request: ArticleCreateOrUpdateRequestDto,
+    ): ResponseEntity<Any> {
         return ResponseEntity.ok().body(articleService.create(request))
     }
 
     @PutMapping("/update/{id}")
-    fun update(@PathVariable id: Long, @RequestBody request: ArticleCreateOrUpdateRequestDto): ResponseEntity<Any> {
+    fun update(
+        @PathVariable id: Long,
+        @RequestBody @Valid request: ArticleCreateOrUpdateRequestDto,
+    ): ResponseEntity<Any> {
         return ResponseEntity.ok().body(articleService.update(request, id))
     }
 
     @DeleteMapping("/delete/{articleId}")
-    fun delete(@PathVariable articleId: Long, @RequestBody request: ArticleDeleteRequestDto): ResponseEntity<Any> {
+    fun delete(
+        @PathVariable articleId: Long,
+        @RequestBody @Valid request: ArticleDeleteRequestDto,
+    ): ResponseEntity<Any> {
         articleService.delete(request, articleId)
         return ResponseEntity.ok().build()
     }

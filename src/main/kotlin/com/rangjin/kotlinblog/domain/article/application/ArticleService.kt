@@ -5,41 +5,46 @@ import com.rangjin.kotlinblog.domain.article.domain.Article
 import com.rangjin.kotlinblog.domain.article.dto.request.ArticleCreateOrUpdateRequestDto
 import com.rangjin.kotlinblog.domain.article.dto.request.ArticleDeleteRequestDto
 import com.rangjin.kotlinblog.domain.article.dto.response.ArticleCreateOrUpdateResponseDto
+import com.rangjin.kotlinblog.domain.user.application.UserService
 import com.rangjin.kotlinblog.domain.user.dao.UserRepository
+import com.rangjin.kotlinblog.domain.user.domain.User
+import com.rangjin.kotlinblog.global.error.CustomException
+import com.rangjin.kotlinblog.global.error.ErrorCode
 import org.springframework.data.repository.findByIdOrNull
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
-import java.lang.Exception
 
 @Service
 class ArticleService (
     private val articleRepository: ArticleRepository,
 
     private val userRepository: UserRepository,
+
+    private val userService: UserService,
+
+    private val passwordEncoder: PasswordEncoder,
 ){
 
     fun create(requestDto: ArticleCreateOrUpdateRequestDto): ArticleCreateOrUpdateResponseDto {
-        // todo: email, password 확인 절차 추가
-        val user = userRepository.findByEmail(requestDto.email) ?: throw Exception("error")
+        val user = userRepository.findByEmail(requestDto.email!!) ?: throw CustomException(ErrorCode.EMAIL_NOT_FOUND)
+        if (!passwordEncoder.matches(requestDto.password, user.password)) throw CustomException(ErrorCode.PASSWORD_MISMATCH)
 
-        // todo: article 유효성 검사("", " ", null)
-        val article = Article(requestDto.content, requestDto.title, user)
+        val article = Article(requestDto.content!!, requestDto.title!!, user)
         return ArticleCreateOrUpdateResponseDto(articleRepository.save(article), requestDto.email)
     }
 
     fun update(requestDto: ArticleCreateOrUpdateRequestDto, id: Long): ArticleCreateOrUpdateResponseDto {
-        // todo: email, password 확인 절차 추가
-        // todo: 존재 하지 않는 게시물 예외 처리 정리
-        // todo: article 유효성 검사("", " ", null)
-        val article = articleRepository.findByIdOrNull(id) ?: throw Exception("error")
-        article.update(requestDto.content, requestDto.content)
+        val article = articleRepository.findByIdOrNull(id) ?: throw CustomException(ErrorCode.ARTICLE_NOT_FOUND)
+        userService.validateUser(article.user, requestDto.email!!, requestDto.password!!)
+
+        article.update(requestDto.content!!, requestDto.title!!)
+
         return ArticleCreateOrUpdateResponseDto(articleRepository.save(article), requestDto.email)
     }
 
-    fun delete(requestDto: ArticleDeleteRequestDto, articleId: Long) {
-        // todo: email, password 확인 절차 추가
-        val user = userRepository.findByEmail(requestDto.email)
-
-        val article = articleRepository.findByIdOrNull(articleId) ?: throw Exception("error")
+    fun delete(requestDto: ArticleDeleteRequestDto, id: Long) {
+        val article = articleRepository.findByIdOrNull(id) ?: throw CustomException(ErrorCode.ARTICLE_NOT_FOUND)
+        userService.validateUser(article.user, requestDto.email!!, requestDto.password!!)
 
         articleRepository.delete(article)
     }
