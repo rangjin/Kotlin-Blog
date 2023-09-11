@@ -4,7 +4,7 @@ import com.rangjin.kotlinblog.global.error.ErrorCode
 import org.springframework.http.HttpStatus
 import java.time.LocalDateTime
 
-open class ExceptionResponseDto(
+class ExceptionResponseDto(
     val time: LocalDateTime,
 
     val status: HttpStatus,

@@ -7,11 +7,9 @@ import com.rangjin.kotlinblog.domain.comment.dto.request.CommentCreateOrUpdateRe
 import com.rangjin.kotlinblog.domain.comment.dto.response.CommentCreateOrUpdateResponseDto
 import com.rangjin.kotlinblog.domain.comment.dto.request.CommentDeleteRequestDto
 import com.rangjin.kotlinblog.domain.user.application.UserService
-import com.rangjin.kotlinblog.domain.user.dao.UserRepository
 import com.rangjin.kotlinblog.global.error.CustomException
 import com.rangjin.kotlinblog.global.error.ErrorCode
 import org.springframework.data.repository.findByIdOrNull
-import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 
 @Service
@@ -20,26 +18,27 @@ class CommentService (
 
     private val articleRepository: ArticleRepository,
 
-    private val userRepository: UserRepository,
-
     private val userService: UserService,
-
-    private val passwordEncoder: PasswordEncoder,
 ){
 
     fun create(requestDto: CommentCreateOrUpdateRequestDto, articleId: Long): CommentCreateOrUpdateResponseDto {
-        val user = userRepository.findByEmail(requestDto.email!!) ?: throw CustomException(ErrorCode.EMAIL_NOT_FOUND)
-        if (!passwordEncoder.matches(requestDto.password, user.password)) throw CustomException(ErrorCode.PASSWORD_MISMATCH)
+        // 사용자 검증
+        val user = userService.validateUser(null, requestDto.email!!, requestDto.password!!)
 
+        // 존재하지 않는 게시물일 경우
         val article = articleRepository.findByIdOrNull(articleId) ?: throw CustomException(ErrorCode.ARTICLE_NOT_FOUND)
 
         return CommentCreateOrUpdateResponseDto(commentRepository.save(Comment(requestDto, article, user)), user.email)
     }
 
     fun update(requestDto: CommentCreateOrUpdateRequestDto, articleId: Long, commentId: Long): CommentCreateOrUpdateResponseDto {
+        // 존재하지 않는 게시물일 경우
         articleRepository.findByIdOrNull(articleId) ?: throw CustomException(ErrorCode.ARTICLE_NOT_FOUND)
 
+        // 존재하지 않는 댓글일 경우
         val comment = commentRepository.findByIdOrNull(commentId) ?: throw CustomException(ErrorCode.COMMENT_NOT_FOUND)
+
+        // 사용자 검증
         userService.validateUser(comment.user, requestDto.email!!, requestDto.password!!)
 
         comment.update(requestDto)
@@ -47,9 +46,13 @@ class CommentService (
     }
 
     fun delete(requestDto: CommentDeleteRequestDto, articleId: Long, commentId: Long) {
+        // 존재하지 않는 게시물일 경우
         articleRepository.findByIdOrNull(articleId) ?: throw CustomException(ErrorCode.ARTICLE_NOT_FOUND)
 
+        // 존재하지 않는 댓글일 경우
         val comment = commentRepository.findByIdOrNull(commentId) ?: throw CustomException(ErrorCode.COMMENT_NOT_FOUND)
+
+        // 사용자 검증
         userService.validateUser(comment.user, requestDto.email!!, requestDto.password!!)
 
         commentRepository.delete(comment)

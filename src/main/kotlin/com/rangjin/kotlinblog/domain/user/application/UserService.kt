@@ -18,26 +18,37 @@ class UserService (
 ){
 
     fun create(requestDto: UserCreateRequestDto): UserCreateResponseDto {
+        // 이메일 중복 처리
         if (userRepository.findByEmail(requestDto.email!!) != null) throw CustomException(ErrorCode.EMAIL_ALREADY_EXIST)
 
-        // todo: password 암호화
+        // 비밀번호 암호화
         val encoded: String = passwordEncoder.encode(requestDto.password)
+
         return UserCreateResponseDto(userRepository.save(User(requestDto, encoded)))
     }
 
     fun delete(requestDto: UserDeleteRequestDto) {
+        // 이메일, 비밀번호 검증
         val user = userRepository.findByEmail(requestDto.email!!) ?: throw CustomException(ErrorCode.EMAIL_NOT_FOUND)
-        if (user.password != requestDto.password) throw CustomException(ErrorCode.PASSWORD_MISMATCH)
+        if (!passwordEncoder.matches(requestDto.password, user.password)) throw CustomException(ErrorCode.PASSWORD_MISMATCH)
 
         userRepository.delete(user)
     }
 
-    fun validateUser(user: User, email: String, password: String) {
+    // Article, Comment에서 사용할 User 검증 로직
+    fun validateUser(obj: User?, email: String, password: String): User {
+        // 존재하지 않는 이메일 처리
+        val user: User = obj ?: (userRepository.findByEmail(email) ?: throw CustomException(ErrorCode.EMAIL_NOT_FOUND))
+
         if (user.email != email) {
+            // 해당 글, 댓글을 작성한 이메일이 아닐 경우
             throw CustomException(ErrorCode.EMAIL_MISMATCH)
         } else if (!passwordEncoder.matches(password, user.password)) {
+            // 비밀번호가 일치하지 않는 경우
             throw CustomException(ErrorCode.PASSWORD_MISMATCH)
         }
+
+        return user
     }
 
 }
