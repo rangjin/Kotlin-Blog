@@ -13,9 +13,11 @@ import org.springframework.stereotype.Service
 
 @Service
 class ArticleService (
+
     private val articleRepository: ArticleRepository,
 
     private val userService: UserService,
+
 ){
 
     fun create(requestDto: ArticleCreateOrUpdateRequestDto): ArticleCreateOrUpdateResponseDto {

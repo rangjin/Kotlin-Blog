@@ -4,6 +4,7 @@ import org.springframework.http.HttpStatus
 import java.time.LocalDateTime
 
 class ValidationErrorResponseDto (
+
     val time: LocalDateTime,
 
     val status: HttpStatus,
@@ -13,6 +14,7 @@ class ValidationErrorResponseDto (
     val message: String,
 
     val requestURI: String,
+
 ) {
 
     constructor(status: HttpStatus, field: String, message: String, requestURI: String): this(

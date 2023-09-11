@@ -10,7 +10,9 @@ import javax.validation.Valid
 @RestController
 @RequestMapping("/api/v1/article")
 class ArticleApiController (
+
     private val articleService: ArticleService,
+
 ) {
 
     @PostMapping("/create")
@@ -28,12 +30,12 @@ class ArticleApiController (
         return ResponseEntity.ok().body(articleService.update(request, id))
     }
 
-    @DeleteMapping("/delete/{articleId}")
+    @DeleteMapping("/delete/{id}")
     fun delete(
-        @PathVariable articleId: Long,
+        @PathVariable id: Long,
         @RequestBody @Valid request: ArticleDeleteRequestDto,
     ): ResponseEntity<Any> {
-        articleService.delete(request, articleId)
+        articleService.delete(request, id)
         return ResponseEntity.ok().build()
     }
 

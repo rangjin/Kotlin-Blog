@@ -16,7 +16,9 @@ import javax.validation.Valid
 @RestController
 @RequestMapping("/api/v1/comment")
 class CommentApiController (
+
     private val commentService: CommentService,
+
 ) {
 
     @PostMapping("/create/{id}")

@@ -14,11 +14,13 @@ import org.springframework.stereotype.Service
 
 @Service
 class CommentService (
+
     private val commentRepository: CommentRepository,
 
     private val articleRepository: ArticleRepository,
 
     private val userService: UserService,
+
 ){
 
     fun create(requestDto: CommentCreateOrUpdateRequestDto, articleId: Long): CommentCreateOrUpdateResponseDto {

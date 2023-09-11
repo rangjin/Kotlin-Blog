@@ -30,7 +30,7 @@ class User (
     @OneToMany(mappedBy = "user", cascade = [CascadeType.REMOVE])
     val commentList: List<Comment>,
 
-    ): BaseTimeEntity() {
+): BaseTimeEntity() {
 
     constructor(requestDto: UserCreateRequestDto, password: String): this(
         null, requestDto.email!!, password, requestDto.username!!, emptyList(), emptyList(),

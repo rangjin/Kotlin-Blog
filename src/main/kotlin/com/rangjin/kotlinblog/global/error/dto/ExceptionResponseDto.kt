@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus
 import java.time.LocalDateTime
 
 class ExceptionResponseDto(
+
     val time: LocalDateTime,
 
     val status: HttpStatus,
@@ -12,6 +13,7 @@ class ExceptionResponseDto(
     val message: String,
 
     val requestURI: String,
+
 ) {
 
     constructor(errorCode: ErrorCode, requestURI: String): this(

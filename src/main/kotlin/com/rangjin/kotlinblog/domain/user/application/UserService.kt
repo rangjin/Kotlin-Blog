@@ -12,9 +12,11 @@ import org.springframework.stereotype.Service
 
 @Service
 class UserService (
+
     private val userRepository: UserRepository,
 
     private val passwordEncoder: PasswordEncoder,
+
 ){
 
     fun create(requestDto: UserCreateRequestDto): UserCreateResponseDto {

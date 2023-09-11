@@ -8,6 +8,7 @@ import javax.persistence.*
 
 @Entity
 class Comment (
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
@@ -19,6 +20,7 @@ class Comment (
 
     @ManyToOne
     val user: User,
+
 ): BaseTimeEntity()  {
 
     constructor(requestDto: CommentCreateOrUpdateRequestDto, article: Article, user: User): this(
