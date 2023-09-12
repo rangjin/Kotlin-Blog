@@ -2,12 +2,11 @@ package com.rangjin.kotlinblog.domain.user.api
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.rangjin.kotlinblog.domain.user.application.UserService
-import com.rangjin.kotlinblog.domain.user.dao.UserRepository
-import com.rangjin.kotlinblog.domain.user.domain.User
 import com.rangjin.kotlinblog.domain.user.dto.request.UserCreateRequestDto
 import com.rangjin.kotlinblog.domain.user.dto.request.UserDeleteRequestDto
-import org.junit.jupiter.api.Assertions.*
+import com.rangjin.kotlinblog.global.common.DataSweepExtension
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
@@ -19,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional
 
 @AutoConfigureMockMvc
 @SpringBootTest
+@ExtendWith(DataSweepExtension::class)
 class UserApiControllerTest @Autowired constructor(
 
     private val mvc: MockMvc,

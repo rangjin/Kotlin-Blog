@@ -6,17 +6,19 @@ import com.rangjin.kotlinblog.domain.article.dto.request.ArticleCreateOrUpdateRe
 import com.rangjin.kotlinblog.domain.article.dto.request.ArticleDeleteRequestDto
 import com.rangjin.kotlinblog.domain.user.dao.UserRepository
 import com.rangjin.kotlinblog.domain.user.domain.User
+import com.rangjin.kotlinblog.global.common.DataSweepExtension
 import com.rangjin.kotlinblog.global.error.CustomException
 import com.rangjin.kotlinblog.global.error.ErrorCode
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.security.crypto.password.PasswordEncoder
-import org.springframework.transaction.annotation.Transactional
 
 @SpringBootTest
+@ExtendWith(DataSweepExtension::class)
 class ArticleServiceTest @Autowired constructor(
 
     private val articleService: ArticleService,
@@ -30,25 +32,21 @@ class ArticleServiceTest @Autowired constructor(
 ){
 
     @Test
-    @Transactional
     fun `create article`() {
         // given
         userRepository.save(User(1L, "email@ursuu.com", passwordEncoder.encode("password"), "username", emptyList(), emptyList()))
 
         // when
-        articleService.create(ArticleCreateOrUpdateRequestDto("email@ursuu.com", "password", "title", "content"))
+        val response = articleService.create(ArticleCreateOrUpdateRequestDto("email@ursuu.com", "password", "title", "content"))
+        val article: Article = articleRepository.findById(response.articleId).get()
 
         // then
-        val article: Article? = articleRepository.findByIdOrNull(1L)
-        assertNotNull(article)
-        assertEquals(article!!.id, 1L)
-        assertEquals(article.title, "title")
-        assertEquals(article.content, "content")
-        assertEquals(article.user.id, 1L)
+        assertEquals("title", article.title)
+        assertEquals("content", article.content)
+        assertEquals(1L, article.user.id)
     }
 
     @Test
-    @Transactional
     fun `update article`() {
         // given
         val user = User(1L, "email@ursuu.com", passwordEncoder.encode("password"), "username", emptyList(), emptyList())
@@ -56,19 +54,17 @@ class ArticleServiceTest @Autowired constructor(
         articleRepository.save(Article(1L, "content", "title", user, emptyList()))
 
         // when
-        articleService.update(ArticleCreateOrUpdateRequestDto("email@ursuu.com", "password", "title2", "content2"), 1L)
+        val response = articleService.update(ArticleCreateOrUpdateRequestDto("email@ursuu.com", "password", "title2", "content2"), 1L)
+        val article: Article = articleRepository.findById(response.articleId).get()
 
         // then
-        val article: Article? = articleRepository.findByIdOrNull(1L)
-        assertNotNull(article)
-        assertEquals(article!!.id, 1L)
+        assertEquals(article.id, 1L)
         assertEquals(article.title, "title2")
         assertEquals(article.content, "content2")
         assertEquals(article.user.id, 1L)
     }
 
     @Test
-    @Transactional
     fun `article not found exception`() {
         // given
         userRepository.save(User(1L, "email@ursuu.com", passwordEncoder.encode("password"), "username", emptyList(), emptyList()))
@@ -82,7 +78,6 @@ class ArticleServiceTest @Autowired constructor(
     }
 
     @Test
-    @Transactional
     fun `delete article`() {
         // given
         val user = User(1L, "email@ursuu.com", passwordEncoder.encode("password"), "username", emptyList(), emptyList())

@@ -8,9 +8,9 @@ import com.rangjin.kotlinblog.domain.comment.dto.request.CommentCreateOrUpdateRe
 import com.rangjin.kotlinblog.domain.comment.dto.request.CommentDeleteRequestDto
 import com.rangjin.kotlinblog.domain.user.application.UserService
 import com.rangjin.kotlinblog.domain.user.dto.request.UserCreateRequestDto
-import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.BeforeAll
+import com.rangjin.kotlinblog.global.common.DataSweepExtension
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional
 
 @AutoConfigureMockMvc
 @SpringBootTest
+@ExtendWith(DataSweepExtension::class)
 class CommentApiControllerTest @Autowired constructor(
 
     private val mvc: MockMvc,
@@ -30,38 +31,24 @@ class CommentApiControllerTest @Autowired constructor(
 
     private val commentService: CommentService,
 
+    private val articleService: ArticleService,
+
+    private val userService: UserService,
+
 ) {
-
-    companion object {
-
-        @BeforeAll
-        @JvmStatic
-        fun beforeAll (
-
-            @Autowired userService: UserService,
-
-            @Autowired articleService: ArticleService,
-
-            @Autowired commentService: CommentService,
-
-        ) {
-            userService.create(UserCreateRequestDto("email@ursuu.com", "password", "username"))
-            articleService.create(ArticleCreateOrUpdateRequestDto("email@ursuu.com", "password", "title", "content"))
-            commentService.create(CommentCreateOrUpdateRequestDto("email@ursuu.com", "password", "content"), 1)
-        }
-
-    }
 
     @Test
     @Transactional
     fun `comment create api`() {
         // given
+        userService.create(UserCreateRequestDto("email@ursuu.com", "password", "username"))
+        val articleId = articleService.create(ArticleCreateOrUpdateRequestDto("email@ursuu.com", "password", "title", "content")).articleId
         val request = CommentCreateOrUpdateRequestDto("email@ursuu.com", "password", "content")
 
         // when
         val result = mvc.perform(
             MockMvcRequestBuilders
-                .post("/api/v1/comment/create/1")
+                .post("/api/v1/comment/create/$articleId")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request))
         )
@@ -69,7 +56,6 @@ class CommentApiControllerTest @Autowired constructor(
         // then
         result
             .andExpect(MockMvcResultMatchers.status().isOk)
-            .andExpect(MockMvcResultMatchers.jsonPath("\$.commentId").value("2"))
             .andExpect(MockMvcResultMatchers.jsonPath("\$.email").value("email@ursuu.com"))
             .andExpect(MockMvcResultMatchers.jsonPath("\$.content").value("content"))
     }
@@ -78,12 +64,15 @@ class CommentApiControllerTest @Autowired constructor(
     @Transactional
     fun `comment update api`() {
         // given
+        userService.create(UserCreateRequestDto("email@ursuu.com", "password", "username"))
+        val articleId = articleService.create(ArticleCreateOrUpdateRequestDto("email@ursuu.com", "password", "title", "content")).articleId
+        val commentId = commentService.create(CommentCreateOrUpdateRequestDto("email@ursuu.com", "password", "content"), articleId).commentId
         val request = CommentCreateOrUpdateRequestDto("email@ursuu.com", "password", "content2")
 
         // when
         val result = mvc.perform(
             MockMvcRequestBuilders
-                .put("/api/v1/comment/update/1/1")
+                .put("/api/v1/comment/update/$articleId/$commentId")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request))
         )
@@ -91,7 +80,7 @@ class CommentApiControllerTest @Autowired constructor(
         // then
         result
             .andExpect(MockMvcResultMatchers.status().isOk)
-            .andExpect(MockMvcResultMatchers.jsonPath("\$.commentId").value("1"))
+            .andExpect(MockMvcResultMatchers.jsonPath("\$.commentId").value(commentId))
             .andExpect(MockMvcResultMatchers.jsonPath("\$.email").value("email@ursuu.com"))
             .andExpect(MockMvcResultMatchers.jsonPath("\$.content").value("content2"))
     }
@@ -100,12 +89,15 @@ class CommentApiControllerTest @Autowired constructor(
     @Transactional
     fun `comment delete api`() {
         // given
+        userService.create(UserCreateRequestDto("email@ursuu.com", "password", "username"))
+        val articleId = articleService.create(ArticleCreateOrUpdateRequestDto("email@ursuu.com", "password", "title", "content")).articleId
+        val commentId = commentService.create(CommentCreateOrUpdateRequestDto("email@ursuu.com", "password", "content"), articleId).commentId
         val request = CommentDeleteRequestDto("email@ursuu.com", "password")
 
         // when
         val result = mvc.perform(
             MockMvcRequestBuilders
-                .delete("/api/v1/comment/delete/1/1")
+                .delete("/api/v1/comment/delete/$articleId/$commentId")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request))
         )
