@@ -5,6 +5,7 @@ import com.rangjin.kotlinblog.domain.comment.dto.request.CommentCreateOrUpdateRe
 import com.rangjin.kotlinblog.domain.user.domain.User
 import com.rangjin.kotlinblog.global.common.BaseTimeEntity
 import javax.persistence.*
+import javax.validation.constraints.NotBlank
 
 @Entity
 class Comment (
@@ -13,6 +14,7 @@ class Comment (
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
 
+    @field:NotBlank(message = "내용은 빈 칸일 수 없습니다")
     var content: String,
 
     @ManyToOne
