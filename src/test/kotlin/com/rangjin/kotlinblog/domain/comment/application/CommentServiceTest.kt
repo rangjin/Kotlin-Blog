@@ -8,17 +8,19 @@ import com.rangjin.kotlinblog.domain.comment.dto.request.CommentCreateOrUpdateRe
 import com.rangjin.kotlinblog.domain.comment.dto.request.CommentDeleteRequestDto
 import com.rangjin.kotlinblog.domain.user.dao.UserRepository
 import com.rangjin.kotlinblog.domain.user.domain.User
-import com.rangjin.kotlinblog.global.common.DataSweepExtension
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.jdbc.EmbeddedDatabaseConnection
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.security.crypto.password.PasswordEncoder
+import org.springframework.transaction.annotation.Transactional
 
 @SpringBootTest
-@ExtendWith(DataSweepExtension::class)
+@Transactional
+@AutoConfigureTestDatabase(connection = EmbeddedDatabaseConnection.H2)
 class CommentServiceTest @Autowired constructor(
 
     private val commentService: CommentService,
@@ -36,54 +38,49 @@ class CommentServiceTest @Autowired constructor(
     @Test
     fun `create comment`() {
         // given
-        val user = User(1L, "email@ursuu.com", passwordEncoder.encode("password"), "username", emptyList(), emptyList())
-        userRepository.save(user)
-        articleRepository.save(Article(1L, "content", "title", user, emptyList()))
+        val user = userRepository.save(User(null, "email@ursuu.com", passwordEncoder.encode("password"), "username", emptyList(), emptyList()))
+        val articleId = articleRepository.save(Article(null, "content", "title", user, emptyList())).id!!
 
         // when
-        val response = commentService.create(CommentCreateOrUpdateRequestDto("email@ursuu.com", "password", "content"), 1L)
+        val response = commentService.create(CommentCreateOrUpdateRequestDto("email@ursuu.com", "password", "content"), articleId)
         val comment: Comment = commentRepository.findById(response.commentId).get()
 
         // then
         assertEquals("content", comment.content)
-        assertEquals(1L, comment.user.id)
-        assertEquals(1L, comment.article.id)
+        assertEquals(articleId, comment.article.id)
+        assertEquals(user.id!!, comment.user.id)
     }
 
     @Test
     fun `update comment`() {
         // given
-        val user = User(1L, "email@ursuu.com", passwordEncoder.encode("password"), "username", emptyList(), emptyList())
-        userRepository.save(user)
-        val article = Article(1L, "content", "title", user, emptyList())
-        articleRepository.save(article)
-        commentRepository.save(Comment(2L, "content", article, user))
+        val user = userRepository.save(User(null, "email@ursuu.com", passwordEncoder.encode("password"), "username", emptyList(), emptyList()))
+        val article = articleRepository.save(Article(null, "content", "title", user, emptyList()))
+        val commentId = commentRepository.save(Comment(null, "content", article, user)).id!!
 
         // when
-        val response = commentService.update(CommentCreateOrUpdateRequestDto("email@ursuu.com", "password", "content2"), 1L, 2L)
-        val comment: Comment = commentRepository.findById(response.commentId).get()
+        commentService.update(CommentCreateOrUpdateRequestDto("email@ursuu.com", "password", "content2"), article.id!!, commentId)
+        val comment = commentRepository.findById(commentId).get()
 
         // then
-        assertEquals(2L, comment.id)
+        assertEquals(commentId, comment.id)
         assertEquals("content2", comment.content)
-        assertEquals(1L, comment.user.id)
-        assertEquals(1L, comment.article.id)
+        assertEquals(article.id, comment.article.id)
+        assertEquals(user.id, comment.user.id)
     }
 
     @Test
     fun `delete comment`() {
         // given
-        val user = User(1L, "email@ursuu.com", passwordEncoder.encode("password"), "username", emptyList(), emptyList())
-        userRepository.save(user)
-        val article = Article(1L, "content", "title", user, emptyList())
-        articleRepository.save(article)
-        commentRepository.save(Comment(1L, "content", article, user))
+        val user = userRepository.save(User(null, "email@ursuu.com", passwordEncoder.encode("password"), "username", emptyList(), emptyList()))
+        val article = articleRepository.save(Article(null, "content", "title", user, emptyList()))
+        val commentId = commentRepository.save(Comment(null, "content", article, user)).id!!
 
         // when
-        commentService.delete(CommentDeleteRequestDto("email@ursuu.com", "password"), 1L, 1L)
+        commentService.delete(CommentDeleteRequestDto("email@ursuu.com", "password"), article.id!!, commentId)
 
         // then
-        assertNull(commentRepository.findByIdOrNull(1L))
+        assertNull(commentRepository.findByIdOrNull(commentId))
     }
 
 }

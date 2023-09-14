@@ -4,10 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.rangjin.kotlinblog.domain.user.application.UserService
 import com.rangjin.kotlinblog.domain.user.dto.request.UserCreateRequestDto
 import com.rangjin.kotlinblog.domain.user.dto.request.UserDeleteRequestDto
-import com.rangjin.kotlinblog.global.common.DataSweepExtension
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.jdbc.EmbeddedDatabaseConnection
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
@@ -18,7 +18,8 @@ import org.springframework.transaction.annotation.Transactional
 
 @AutoConfigureMockMvc
 @SpringBootTest
-@ExtendWith(DataSweepExtension::class)
+@Transactional
+@AutoConfigureTestDatabase(connection = EmbeddedDatabaseConnection.H2)
 class UserApiControllerTest @Autowired constructor(
 
     private val mvc: MockMvc,
@@ -30,7 +31,6 @@ class UserApiControllerTest @Autowired constructor(
 ) {
 
     @Test
-    @Transactional
     fun `user signup api`() {
         // given
         val request = UserCreateRequestDto("email@ursuu.com", "password", "username")
@@ -51,7 +51,6 @@ class UserApiControllerTest @Autowired constructor(
     }
 
     @Test
-    @Transactional
     fun `not blank validation error exception`() {
         // given
         val request = UserCreateRequestDto(null, "password", "username")
@@ -73,7 +72,6 @@ class UserApiControllerTest @Autowired constructor(
     }
 
     @Test
-    @Transactional
     fun `email validation error exception`() {
         // given
         val request = UserCreateRequestDto("email", "password", "username")
@@ -95,7 +93,6 @@ class UserApiControllerTest @Autowired constructor(
     }
 
     @Test
-    @Transactional
     fun `user delete api`() {
         // given
         userService.create(UserCreateRequestDto("email@ursuu.com", "password", "username"))

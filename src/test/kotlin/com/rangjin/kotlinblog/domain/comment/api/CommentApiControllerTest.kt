@@ -8,10 +8,10 @@ import com.rangjin.kotlinblog.domain.comment.dto.request.CommentCreateOrUpdateRe
 import com.rangjin.kotlinblog.domain.comment.dto.request.CommentDeleteRequestDto
 import com.rangjin.kotlinblog.domain.user.application.UserService
 import com.rangjin.kotlinblog.domain.user.dto.request.UserCreateRequestDto
-import com.rangjin.kotlinblog.global.common.DataSweepExtension
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.jdbc.EmbeddedDatabaseConnection
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
@@ -22,7 +22,8 @@ import org.springframework.transaction.annotation.Transactional
 
 @AutoConfigureMockMvc
 @SpringBootTest
-@ExtendWith(DataSweepExtension::class)
+@Transactional
+@AutoConfigureTestDatabase(connection = EmbeddedDatabaseConnection.H2)
 class CommentApiControllerTest @Autowired constructor(
 
     private val mvc: MockMvc,
@@ -38,7 +39,6 @@ class CommentApiControllerTest @Autowired constructor(
 ) {
 
     @Test
-    @Transactional
     fun `comment create api`() {
         // given
         userService.create(UserCreateRequestDto("email@ursuu.com", "password", "username"))
@@ -61,7 +61,6 @@ class CommentApiControllerTest @Autowired constructor(
     }
 
     @Test
-    @Transactional
     fun `comment update api`() {
         // given
         userService.create(UserCreateRequestDto("email@ursuu.com", "password", "username"))
@@ -86,7 +85,6 @@ class CommentApiControllerTest @Autowired constructor(
     }
 
     @Test
-    @Transactional
     fun `comment delete api`() {
         // given
         userService.create(UserCreateRequestDto("email@ursuu.com", "password", "username"))

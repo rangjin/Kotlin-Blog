@@ -4,20 +4,21 @@ import com.rangjin.kotlinblog.domain.user.dao.UserRepository
 import com.rangjin.kotlinblog.domain.user.domain.User
 import com.rangjin.kotlinblog.domain.user.dto.request.UserCreateRequestDto
 import com.rangjin.kotlinblog.domain.user.dto.request.UserDeleteRequestDto
-import com.rangjin.kotlinblog.global.common.DataSweepExtension
 import com.rangjin.kotlinblog.global.error.CustomException
 import com.rangjin.kotlinblog.global.error.ErrorCode
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.jdbc.EmbeddedDatabaseConnection
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.transaction.annotation.Transactional
 
 @SpringBootTest
-@ExtendWith(DataSweepExtension::class)
+@Transactional
+@AutoConfigureTestDatabase(connection = EmbeddedDatabaseConnection.H2)
 class UserServiceTest @Autowired constructor(
 
     private val userService: UserService,
@@ -29,7 +30,6 @@ class UserServiceTest @Autowired constructor(
 ) {
 
     @Test
-    @Transactional
     fun `create user`() {
         // given & when
         userService.create(UserCreateRequestDto("email@ursuu.com", "password", "username"))
@@ -43,10 +43,9 @@ class UserServiceTest @Autowired constructor(
     }
 
     @Test
-    @Transactional
     fun `email already exist exception`() {
         // given
-        userRepository.save(User(1L, "email@ursuu.com", passwordEncoder.encode("password"), "username", emptyList(), emptyList()))
+        userRepository.save(User(null, "email@ursuu.com", passwordEncoder.encode("password"), "username", emptyList(), emptyList()))
 
         // when & then
         val exception: CustomException = assertThrows(CustomException::class.java) {
@@ -57,24 +56,21 @@ class UserServiceTest @Autowired constructor(
     }
 
     @Test
-    @Transactional
     fun `delete user`() {
         // given
-        userRepository.save(User(1L, "email@ursuu.com", passwordEncoder.encode("password"), "username", emptyList(), emptyList()))
+        val user = userRepository.save(User(null, "email@ursuu.com", passwordEncoder.encode("password"), "username", emptyList(), emptyList()))
 
         // when
         userService.delete(UserDeleteRequestDto("email@ursuu.com", "password"))
 
         // then
-        assertNull(userRepository.findByIdOrNull(1L))
+        assertNull(userRepository.findByIdOrNull(user.id))
     }
 
     @Test
-    @Transactional
     fun `validate user`() {
         // given
-        val user = User(1L, "email@ursuu.com", passwordEncoder.encode("password"), "username", emptyList(), emptyList())
-        userRepository.save(user)
+        val user = userRepository.save(User(null, "email@ursuu.com", passwordEncoder.encode("password"), "username", emptyList(), emptyList()))
 
         // when
         val obj = userService.validateUser(user, "email@ursuu.com", "password")
@@ -87,7 +83,6 @@ class UserServiceTest @Autowired constructor(
     }
 
     @Test
-    @Transactional
     fun `email not found exception`() {
         // given & when & then
         val exception: CustomException = assertThrows(CustomException::class.java) {
@@ -98,11 +93,9 @@ class UserServiceTest @Autowired constructor(
     }
 
     @Test
-    @Transactional
     fun `email mismatch exception`() {
         // given
-        val user = User(1L, "email@ursuu.com", passwordEncoder.encode("password"), "username", emptyList(), emptyList())
-        userRepository.save(user)
+        val user = userRepository.save(User(null, "email@ursuu.com", passwordEncoder.encode("password"), "username", emptyList(), emptyList()))
 
         // when & then
         val exception: CustomException = assertThrows(CustomException::class.java) {
@@ -113,11 +106,9 @@ class UserServiceTest @Autowired constructor(
     }
 
     @Test
-    @Transactional
     fun `password mismatch exception`() {
         // given
-        val user = User(1L, "email@ursuu.com", passwordEncoder.encode("password"), "username", emptyList(), emptyList())
-        userRepository.save(user)
+        val user = userRepository.save(User(null, "email@ursuu.com", passwordEncoder.encode("password"), "username", emptyList(), emptyList()))
 
         // when & then
         val exception: CustomException = assertThrows(CustomException::class.java) {

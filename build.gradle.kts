@@ -10,6 +10,7 @@ plugins {
 
 group = "com.rangjin"
 version = "0.0.1-SNAPSHOT"
+val mockkVersion = "1.13.7"
 
 java {
     sourceCompatibility = JavaVersion.VERSION_11
@@ -30,7 +31,9 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     runtimeOnly("com.mysql:mysql-connector-j")
+    testRuntimeOnly("com.h2database:h2:1.4.200")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.springframework.security:spring-security-test")
 }
 
 tasks.withType<KotlinCompile> {

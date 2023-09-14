@@ -6,10 +6,10 @@ import com.rangjin.kotlinblog.domain.article.dto.request.ArticleCreateOrUpdateRe
 import com.rangjin.kotlinblog.domain.article.dto.request.ArticleDeleteRequestDto
 import com.rangjin.kotlinblog.domain.user.application.UserService
 import com.rangjin.kotlinblog.domain.user.dto.request.UserCreateRequestDto
-import com.rangjin.kotlinblog.global.common.DataSweepExtension
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.jdbc.EmbeddedDatabaseConnection
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
@@ -20,7 +20,8 @@ import org.springframework.transaction.annotation.Transactional
 
 @AutoConfigureMockMvc
 @SpringBootTest
-@ExtendWith(DataSweepExtension::class)
+@Transactional
+@AutoConfigureTestDatabase(connection = EmbeddedDatabaseConnection.H2)
 class ArticleApiControllerTest @Autowired constructor(
 
     private val mvc: MockMvc,
@@ -34,7 +35,6 @@ class ArticleApiControllerTest @Autowired constructor(
 ) {
 
     @Test
-    @Transactional
     fun `article create api`() {
         // given
         userService.create(UserCreateRequestDto("email@ursuu.com", "password", "username"))
@@ -57,7 +57,6 @@ class ArticleApiControllerTest @Autowired constructor(
     }
 
     @Test
-    @Transactional
     fun `article update api`() {
         // given
         userService.create(UserCreateRequestDto("email@ursuu.com", "password", "username"))
@@ -82,7 +81,6 @@ class ArticleApiControllerTest @Autowired constructor(
     }
 
     @Test
-    @Transactional
     fun `article delete api`() {
         // given
         userService.create(UserCreateRequestDto("email@ursuu.com", "password", "username"))
